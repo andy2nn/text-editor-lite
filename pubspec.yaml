@@ -1,0 +1,33 @@
+name: training_cloud_crm_web
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_bloc: ^9.1.1
+  get_it: ^8.2.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  supabase_flutter: ^2.0.0
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  # assets:
+  #   - images/a_dot_burr.jpeg
+  #   - images/a_dot_ham.jpeg
