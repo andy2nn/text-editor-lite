@@ -51,3 +51,6 @@ linux
 macos
 web
 windows
+
+# файлы генерации
+*.g.dart

@@ -7,7 +7,7 @@ import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_event.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/pages/auth_page.dart';
-import 'package:training_cloud_crm_web/features/history/history_page.dart';
+import 'package:training_cloud_crm_web/features/history/presintation/history_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
