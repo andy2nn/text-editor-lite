@@ -23,7 +23,7 @@ class TextDocumentModel extends HiveObject {
 
   TextDocumentEntity toEntity() {
     return TextDocumentEntity(
-      id: id,
+      id: int.parse(id),
       title: title,
       content: content,
       lastEdited: lastEdited,
@@ -32,7 +32,7 @@ class TextDocumentModel extends HiveObject {
 
   static TextDocumentModel fromEntity(TextDocumentEntity entity) {
     return TextDocumentModel(
-      id: entity.id,
+      id: entity.id.toString(),
       title: entity.title,
       content: entity.content,
       lastEdited: entity.lastEdited,

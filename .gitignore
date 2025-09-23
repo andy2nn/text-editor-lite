@@ -45,10 +45,8 @@ app.*.map.json
 /android/app/release
 
 # Закинул тк пока нет необходимости тащить в репу 
-ios
 android
 linux
-macos
 web
 windows
 

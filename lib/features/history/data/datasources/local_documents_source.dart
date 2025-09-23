@@ -13,7 +13,11 @@ class LocalDocumentsSource {
     await box.put(model.id, model);
   }
 
-  Future<void> delete(String id) async {
+  Future<void> delete(int id) async {
     await box.delete(id);
+  }
+
+  Future<void> update(TextDocumentModel model) async {
+    await box.put(model.id, model);
   }
 }

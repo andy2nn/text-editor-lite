@@ -14,6 +14,7 @@ final getIt = GetIt.instance;
 final supabase = Supabase.instance.client;
 
 Future<void> setup() async {
+  Hive.registerAdapter(TextDocumentModelAdapter());
   final box = await Hive.openBox<TextDocumentModel>(textsBox);
 
   getIt.registerLazySingleton<Box>(() => box);

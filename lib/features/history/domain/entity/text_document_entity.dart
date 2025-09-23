@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class TextDocumentEntity {
-  final String id;
+  final int id;
   final String title;
   final String content;
   final DateTime lastEdited;
@@ -14,7 +14,7 @@ class TextDocumentEntity {
   });
 
   TextDocumentEntity copyWith({
-    String? id,
+    int? id,
     String? title,
     String? content,
     DateTime? lastEdited,
@@ -32,16 +32,16 @@ class TextDocumentEntity {
       'id': id,
       'title': title,
       'content': content,
-      'lastEdited': lastEdited.millisecondsSinceEpoch,
+      'last_edited': lastEdited.toIso8601String(),
     };
   }
 
   factory TextDocumentEntity.fromMap(Map<String, dynamic> map) {
     return TextDocumentEntity(
-      id: map['id'] as String,
+      id: map['id'] as int,
       title: map['title'] as String,
       content: map['content'] as String,
-      lastEdited: DateTime.fromMillisecondsSinceEpoch(map['lastEdited'] as int),
+      lastEdited: DateTime.parse(map['last_edited'] as String),
     );
   }
 
@@ -53,23 +53,5 @@ class TextDocumentEntity {
   @override
   String toString() {
     return 'TextDocumentEntity(id: $id, title: $title, content: $content, lastEdited: $lastEdited)';
-  }
-
-  @override
-  bool operator ==(covariant TextDocumentEntity other) {
-    if (identical(this, other)) return true;
-
-    return other.id == id &&
-        other.title == title &&
-        other.content == content &&
-        other.lastEdited == lastEdited;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        title.hashCode ^
-        content.hashCode ^
-        lastEdited.hashCode;
   }
 }

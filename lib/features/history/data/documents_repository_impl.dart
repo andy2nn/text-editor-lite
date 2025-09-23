@@ -9,7 +9,7 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   final RemoteDocumentsSource remote;
   DocumentsRepositoryImpl({required this.local, required this.remote});
   @override
-  Future<void> deleteDocument(String id) async {
+  Future<void> deleteDocument(int id) async {
     await local.delete(id);
     await remote.client.from('documents').delete().eq('id', id);
   }
@@ -25,5 +25,11 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   Future<void> saveDocument(TextDocumentEntity entity) async {
     await local.save(TextDocumentModel.fromEntity(entity));
     await remote.upload(entity);
+  }
+
+  @override
+  Future<void> updateDocument(TextDocumentEntity entity) async {
+    await local.update(TextDocumentModel.fromEntity(entity));
+    await remote.update(entity);
   }
 }
