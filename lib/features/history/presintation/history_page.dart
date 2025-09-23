@@ -33,6 +33,10 @@ class HistoryPage extends StatelessWidget {
                 icon: const Icon(Icons.sync),
                 tooltip: 'Синхронизировать',
               ),
+              IconButton(
+                onPressed: () => Navigator.pushNamed(context, '/settings'),
+                icon: Icon(Icons.settings),
+              ),
             ],
           ),
           body: SafeArea(

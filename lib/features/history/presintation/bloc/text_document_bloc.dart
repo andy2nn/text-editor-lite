@@ -81,6 +81,7 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     try {
+      //TODO: удаление работает некорректно
       await docRepository.deleteDocument(event.id);
       final documents = docRepository.getLocalDocuments();
       emit(TextDocumentLoaded(documents: documents));
