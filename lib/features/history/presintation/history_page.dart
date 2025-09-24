@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_state.dart';
+import 'package:training_cloud_crm_web/widgets/document_card.dart';
 import 'package:training_cloud_crm_web/widgets/document_dialog_widget.dart';
 
 class HistoryPage extends StatelessWidget {
@@ -64,21 +65,9 @@ class HistoryPage extends StatelessWidget {
               itemCount: state.documents.length,
               itemBuilder: (context, index) {
                 final document = state.documents[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(document.title),
-                    subtitle: Text(
-                      'Изменен: ${_formatDate(document.lastEdited)}',
-                    ),
-                    trailing: IconButton(
-                      onPressed: () => context.read<TextDocumentBloc>().add(
-                        DeleteTextDocument(id: document.id),
-                      ),
-                      icon: const Icon(Icons.delete),
-                      tooltip: 'Удалить',
-                    ),
-                    onTap: () => _navigateToDocument(context, document),
-                  ),
+                return DocumentCard(
+                  document: document,
+                  onTap: () => _navigateToDocument(context, document),
                 );
               },
             );
@@ -114,9 +103,5 @@ class HistoryPage extends StatelessWidget {
       "/textDocumentPage",
       arguments: {'document': document, 'canEdit': !isMobile},
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}.${date.month}.${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
