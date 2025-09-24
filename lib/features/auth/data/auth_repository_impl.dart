@@ -8,17 +8,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> signUp(String email, String password) async {
-    await client.auth.signUp(email: email, password: password);
+    try {
+      await client.auth.signUp(email: email, password: password);
+    } on AuthException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Ошибка регистрации пользователя, попробуйте еще раз');
+    }
   }
 
   @override
   Future<void> signIn(String email, String password) async {
-    await client.auth.signInWithPassword(email: email, password: password);
+    try {
+      await client.auth.signInWithPassword(email: email, password: password);
+    } on AuthException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Ошибка входа, попробуйте еще раз');
+    }
   }
 
   @override
   Future<void> signOut() async {
-    await client.auth.signOut();
+    try {
+      await client.auth.signOut();
+    } on AuthException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Ошибка выхода, попробуйте еще раз');
+    }
   }
 
   @override

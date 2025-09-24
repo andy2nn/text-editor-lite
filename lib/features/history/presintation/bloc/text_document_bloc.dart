@@ -21,20 +21,16 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     AddTextDocument event,
     Emitter<TextDocumentState> emit,
   ) async {
-    try {
-      final document = TextDocumentEntity(
-        id: DateTime.now().millisecondsSinceEpoch,
-        title: event.title,
-        content: '',
-        lastEdited: DateTime.now(),
-      );
+    final document = TextDocumentEntity(
+      id: DateTime.now().millisecondsSinceEpoch,
+      title: event.title,
+      content: '',
+      lastEdited: DateTime.now(),
+    );
 
-      await docRepository.saveDocument(document);
-      final documents = docRepository.getLocalDocuments();
-      emit(TextDocumentLoaded(documents: documents));
-    } catch (e) {
-      emit(TextDocumentError(e.toString()));
-    }
+    await docRepository
+        .saveDocument(document)
+        .catchError(((e) => emit(TextDocumentError(e.toString()))));
   }
 
   Future<void> _loadTextDocuments(
@@ -42,52 +38,38 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     emit(TextDocumentLoading());
-    try {
-      final documents = docRepository.getLocalDocuments();
-      emit(TextDocumentLoaded(documents: documents));
-    } catch (e) {
-      emit(TextDocumentError(e.toString()));
-    }
+
+    final documents = docRepository.getLocalDocuments();
+    emit(TextDocumentLoaded(documents: documents));
   }
 
   Future<void> _saveTextDocument(
     SaveTextDocument event,
     Emitter<TextDocumentState> emit,
   ) async {
-    try {
-      await docRepository.saveDocument(event.document);
-      final documents = docRepository.getLocalDocuments();
-      emit(TextDocumentLoaded(documents: documents));
-    } catch (e) {
-      emit(TextDocumentError(e.toString()));
-    }
+    await docRepository
+        .saveDocument(event.document)
+        .catchError((e) => emit(TextDocumentError(e.toString())));
   }
 
   Future<void> _updateTextDocument(
     UpdateTextDocument event,
     Emitter<TextDocumentState> emit,
   ) async {
-    try {
-      await docRepository.updateDocument(event.document);
-      final documents = docRepository.getLocalDocuments();
-      emit(TextDocumentLoaded(documents: documents));
-    } catch (e) {
-      emit(TextDocumentError(e.toString()));
-    }
+    await docRepository
+        .updateDocument(event.document)
+        .catchError(((e) => emit(TextDocumentError(e.toString()))));
+    ;
   }
 
   Future<void> _deleteTextDocument(
     DeleteTextDocument event,
     Emitter<TextDocumentState> emit,
   ) async {
-    try {
-      //TODO: удаление работает некорректно
-      await docRepository.deleteDocument(event.id);
-      final documents = docRepository.getLocalDocuments();
-      emit(TextDocumentLoaded(documents: documents));
-    } catch (e) {
-      emit(TextDocumentError(e.toString()));
-    }
+    await docRepository
+        .deleteDocument(event.id)
+        .catchError(((e) => emit(TextDocumentError(e.toString()))));
+    ;
   }
 
   Future<void> _syncTextDocuments(
@@ -95,29 +77,26 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     emit(TextDocumentLoading());
-    try {
-      final remoteDocuments = await docRepository.fetchRemoteDocuments();
-      final localDocuments = docRepository.getLocalDocuments();
+    final remoteDocuments = await docRepository.fetchRemoteDocuments();
+    final localDocuments = docRepository.getLocalDocuments();
 
-      for (var remoteDoc in remoteDocuments) {
-        final matchingLocalDocs = localDocuments
-            .where((doc) => doc.id == remoteDoc.id)
-            .toList();
+    for (var remoteDoc in remoteDocuments) {
+      final matchingLocalDocs = localDocuments
+          .where((doc) => doc.id == remoteDoc.id)
+          .toList();
 
-        if (matchingLocalDocs.isEmpty) {
-          await docRepository.saveDocument(remoteDoc);
-        } else {
-          final localDoc = matchingLocalDocs.first;
-          if (localDoc.lastEdited.isBefore(remoteDoc.lastEdited)) {
-            await docRepository.updateDocument(remoteDoc);
-          }
+      if (matchingLocalDocs.isEmpty) {
+        await docRepository
+            .saveDocument(remoteDoc)
+            .catchError(((e) => emit(TextDocumentError(e.toString()))));
+      } else {
+        final localDoc = matchingLocalDocs.first;
+        if (localDoc.lastEdited.isBefore(remoteDoc.lastEdited)) {
+          await docRepository
+              .updateDocument(remoteDoc)
+              .catchError(((e) => emit(TextDocumentError(e.toString()))));
         }
       }
-
-      final updatedDocuments = docRepository.getLocalDocuments();
-      emit(TextDocumentLoaded(documents: updatedDocuments));
-    } catch (e) {
-      emit(TextDocumentError(e.toString()));
     }
   }
 }

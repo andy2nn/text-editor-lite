@@ -11,26 +11,49 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
 
   @override
   Future<void> deleteDocument(int id) async {
-    await local.delete(id);
-    await remote.client.from('documents').delete().eq('id', id);
+    try {
+      await local.delete(id);
+      await remote.client.from('documents').delete().eq('id', id);
+    } catch (e) {
+      throw Exception('Ошибка при удалении документа: $e');
+    }
   }
 
   @override
-  Future<List<TextDocumentEntity>> fetchRemoteDocuments() => remote.fetchAll();
+  Future<List<TextDocumentEntity>> fetchRemoteDocuments() {
+    try {
+      return remote.fetchAll();
+    } catch (e) {
+      throw Exception('Ошибка при получении документов с сервера: $e');
+    }
+  }
 
   @override
-  List<TextDocumentEntity> getLocalDocuments() =>
-      local.getAll().map((e) => e.toEntity()).toList();
+  List<TextDocumentEntity> getLocalDocuments() {
+    try {
+      return local.getAll().map((e) => e.toEntity()).toList();
+    } catch (e) {
+      throw Exception('Ошибка при получении локальных документов: $e');
+    }
+  }
 
   @override
   Future<void> saveDocument(TextDocumentEntity entity) async {
-    await local.save(TextDocumentModel.fromEntity(entity));
-    await remote.upload(entity);
+    try {
+      await local.save(TextDocumentModel.fromEntity(entity));
+      await remote.upload(entity);
+    } catch (e) {
+      throw Exception('Ошибка при сохранении документа: $e');
+    }
   }
 
   @override
   Future<void> updateDocument(TextDocumentEntity entity) async {
-    await local.update(TextDocumentModel.fromEntity(entity));
-    await remote.update(entity);
+    try {
+      await local.update(TextDocumentModel.fromEntity(entity));
+      await remote.update(entity);
+    } catch (e) {
+      throw Exception('Ошибка при обновлении документа: $e');
+    }
   }
 }
