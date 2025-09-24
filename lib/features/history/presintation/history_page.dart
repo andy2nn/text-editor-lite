@@ -49,10 +49,15 @@ class HistoryPage extends StatelessWidget {
               child: _buildContent(state),
             ),
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showAddDocumentDialog(context),
-            child: const Icon(Icons.add),
-          ),
+          floatingActionButton:
+              (defaultTargetPlatform == TargetPlatform.macOS ||
+                  defaultTargetPlatform == TargetPlatform.windows ||
+                  defaultTargetPlatform == TargetPlatform.linux)
+              ? FloatingActionButton(
+                  onPressed: () => _showAddDocumentDialog(context),
+                  child: const Icon(Icons.add),
+                )
+              : null,
         );
       },
     );
