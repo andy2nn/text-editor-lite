@@ -17,7 +17,7 @@ Future<void> setup() async {
   Hive.registerAdapter(TextDocumentModelAdapter());
   final box = await Hive.openBox<TextDocumentModel>(textsBox);
 
-  getIt.registerLazySingleton<Box>(() => box);
+  getIt.registerLazySingleton<Box<TextDocumentModel>>(() => box);
   getIt.registerLazySingleton<SupabaseClient>(() => supabase);
 
   getIt.registerLazySingleton<LocalDocumentsSource>(

@@ -53,68 +53,139 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
   @override
   Widget build(BuildContext context) {
     if (!_isArgumentsLoaded || document == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: _isEditing
             ? TextField(
                 controller: _titleController,
-                style: const TextStyle(color: Colors.white, fontSize: 20),
-                decoration: const InputDecoration(
-                  hintText: 'Название документа',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Введите название...',
                   hintStyle: TextStyle(color: Colors.white70),
                   border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
                 ),
               )
-            : Text(document!.title),
-        actions: _buildAppBarActions(context),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: _isEditing
-            ? TextField(
-                controller: _contentController,
-                maxLines: null,
-                expands: true,
-                decoration: const InputDecoration(
-                  hintText: 'Содержание документа...',
-                  border: InputBorder.none,
-                ),
-              )
-            : SingleChildScrollView(
-                child: Text(
-                  document!.content.isEmpty
-                      ? 'Документ пуст'
-                      : document!.content,
-                  style: const TextStyle(fontSize: 16),
-                ),
+            : Text(
+                document!.title,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
+        backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
+        actions: _buildAppBarActions(),
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+        ),
+      ),
+      body: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: _isEditing
+              ? TextField(
+                  controller: _contentController,
+                  maxLines: null,
+                  expands: true,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    height: 1.5,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Начните вводить текст...',
+                    hintStyle: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                    border: InputBorder.none,
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Text(
+                    document!.content.isEmpty
+                        ? 'Документ пуст'
+                        : document!.content,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+        ),
       ),
       floatingActionButton: _buildFloatingActionButton(),
     );
   }
 
-  List<Widget> _buildAppBarActions(BuildContext context) {
+  List<Widget> _buildAppBarActions() {
     if (!canEdit) return [];
 
     return [
       if (_isEditing)
         IconButton(
           onPressed: _saveDocument,
-          icon: const Icon(Icons.save),
+          icon: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.save_rounded, size: 22),
+          ),
           tooltip: 'Сохранить',
         )
       else
         IconButton(
           onPressed: () => setState(() => _isEditing = true),
-          icon: const Icon(Icons.edit),
+          icon: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.edit_rounded, size: 22),
+          ),
           tooltip: 'Редактировать',
         ),
       IconButton(
         onPressed: _isEditing ? _cancelEdit : _closeDocument,
-        icon: const Icon(Icons.close),
+        icon: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(Icons.close_rounded, size: 22),
+        ),
         tooltip: _isEditing ? 'Отменить' : 'Закрыть',
       ),
     ];
@@ -125,22 +196,28 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
 
     return FloatingActionButton(
       onPressed: _saveDocument,
-      child: const Icon(Icons.save),
+      backgroundColor: Theme.of(context).primaryColor,
+      foregroundColor: Colors.white,
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: const Icon(Icons.save_rounded, size: 28),
     );
   }
 
   void _saveDocument() {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Название документа не может быть пустым'),
+        SnackBar(
+          content: const Text('Название документа не может быть пустым'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       );
       return;
     }
 
-    final updatedDocument = TextDocumentEntity(
-      id: document!.id,
+    final updatedDocument = document!.copyWith(
       title: _titleController.text.trim(),
       content: _contentController.text,
       lastEdited: DateTime.now(),
@@ -154,9 +231,14 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
 
     setState(() => _isEditing = false);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Документ сохранен')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Документ сохранен'),
+        backgroundColor: Theme.of(context).primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
   }
 
   void _cancelEdit() {

@@ -24,6 +24,7 @@ class HistoryPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        context.read<TextDocumentBloc>().add(LoadTextDocuments());
         return Scaffold(
           appBar: AppBar(
             title: const Text('Документы'),

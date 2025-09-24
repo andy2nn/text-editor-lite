@@ -10,7 +10,6 @@ import 'package:training_cloud_crm_web/features/auth/presentation/pages/auth_pag
 import 'package:training_cloud_crm_web/features/auth/presentation/pages/settings_page.dart';
 import 'package:training_cloud_crm_web/features/history/domain/documents_repository.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
-import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/history_page.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/text_document_page.dart';
 
@@ -38,7 +37,7 @@ void main() async {
         BlocProvider(
           create: (context) => TextDocumentBloc(
             docRepository: di.getIt.get<DocumentsRepository>(),
-          )..add(LoadTextDocuments()),
+          ),
         ),
       ],
       child: const App(),
