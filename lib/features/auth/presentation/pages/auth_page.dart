@@ -18,6 +18,7 @@ class _AuthPageState extends State<AuthPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isSignIn = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,6 +34,21 @@ class _AuthPageState extends State<AuthPage> {
         listener: (context, state) {
           if (state is AuthAuthenticated) {
             Navigator.pushReplacementNamed(context, AppNavigator.historyPage);
+          }
+          if (state is AuthLoading) {
+            _isLoading = true;
+          } else {
+            _isLoading = false;
+          }
+          if (state is AuthSignUpSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'На вашу почту отправлено письмо для подтверждения',
+                ),
+              ),
+            );
+            _isSignIn = true;
           }
           if (state is AuthError) {
             showDialog(
@@ -71,6 +87,7 @@ class _AuthPageState extends State<AuthPage> {
                 ),
 
                 CustomButton(
+                  isLoading: _isLoading,
                   text: _isSignIn ? 'Войти' : 'Зарегистрироваться',
                   onPressed: () {
                     final email = _emailController.text;
