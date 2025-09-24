@@ -7,6 +7,7 @@ import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_event.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/pages/auth_page.dart';
+import 'package:training_cloud_crm_web/features/auth/presentation/pages/settings_page.dart';
 import 'package:training_cloud_crm_web/features/history/domain/documents_repository.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/history_page.dart';
@@ -54,6 +55,7 @@ class App extends StatelessWidget {
         'auth': (context) => const AuthPage(),
         '/history': (context) => const HistoryPage(),
         '/textDocumentPage': (context) => TextDocumentPage(),
+        '/settings': (context) => SettingsPage(),
       },
       initialRoute: 'auth',
     );

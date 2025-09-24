@@ -1,7 +1,10 @@
 import 'package:bloc/bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:training_cloud_crm_web/core/di/injection.dart';
 import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_event.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_state.dart';
+import 'package:training_cloud_crm_web/features/history/domain/model/text_document_model.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
@@ -35,9 +38,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _signOut(SignOutRequested event, Emitter<AuthState> emit) async {
     try {
       emit(AuthLoading());
+
       await authRepository.signOut();
+
+      if (getIt.isRegistered<Box<TextDocumentModel>>()) {
+        final box = getIt<Box<TextDocumentModel>>();
+        await box.clear();
+      }
+
       emit(AuthUnauthenticated());
     } catch (e) {
+      print('SignOut error: $e');
       emit(AuthError(e.toString()));
     }
   }

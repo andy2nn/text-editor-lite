@@ -8,6 +8,7 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   final LocalDocumentsSource local;
   final RemoteDocumentsSource remote;
   DocumentsRepositoryImpl({required this.local, required this.remote});
+
   @override
   Future<void> deleteDocument(int id) async {
     await local.delete(id);

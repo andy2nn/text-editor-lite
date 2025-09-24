@@ -14,7 +14,7 @@ class LocalDocumentsSource {
   }
 
   Future<void> delete(int id) async {
-    await box.delete(id);
+    await box.delete(id.toString());
   }
 
   Future<void> update(TextDocumentModel model) async {
