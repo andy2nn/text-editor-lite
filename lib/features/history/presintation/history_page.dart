@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_state.dart';
@@ -36,7 +37,8 @@ class HistoryPage extends StatelessWidget {
                 tooltip: 'Синхронизировать',
               ),
               IconButton(
-                onPressed: () => Navigator.pushNamed(context, '/settings'),
+                onPressed: () =>
+                    Navigator.pushNamed(context, AppNavigator.settingsPage),
                 icon: Icon(Icons.settings),
               ),
             ],
@@ -101,7 +103,7 @@ class HistoryPage extends StatelessWidget {
 
     Navigator.pushNamed(
       context,
-      "/textDocumentPage",
+      AppNavigator.textDocumentPage,
       arguments: {'document': document, 'canEdit': !isMobile},
     );
   }

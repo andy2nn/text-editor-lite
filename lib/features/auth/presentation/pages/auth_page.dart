@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_event.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_state.dart';
@@ -31,7 +32,7 @@ class _AuthPageState extends State<AuthPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, '/history');
+            Navigator.pushReplacementNamed(context, AppNavigator.historyPage);
           }
           if (state is AuthError) {
             showDialog(
