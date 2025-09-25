@@ -1,3 +1,4 @@
+import 'package:training_cloud_crm_web/features/auth/domain/user_entity.dart/user_entity.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/local_documents_source.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/remote_documents_source.dart';
 import 'package:training_cloud_crm_web/features/history/domain/documents_repository.dart';
@@ -7,7 +8,12 @@ import 'package:training_cloud_crm_web/features/history/domain/model/text_docume
 class DocumentsRepositoryImpl implements DocumentsRepository {
   final LocalDocumentsSource local;
   final RemoteDocumentsSource remote;
-  DocumentsRepositoryImpl({required this.local, required this.remote});
+  final UserEntity? currentUser;
+  DocumentsRepositoryImpl({
+    required this.local,
+    required this.remote,
+    required this.currentUser,
+  });
 
   @override
   Future<void> deleteDocument(int id) async {
@@ -22,7 +28,7 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   @override
   Future<List<TextDocumentEntity>> fetchRemoteDocuments() {
     try {
-      return remote.fetchAll();
+      return remote.fetchAll(currentUser);
     } catch (e) {
       throw Exception('Ошибка при получении документов с сервера: $e');
     }
@@ -41,7 +47,7 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   Future<void> saveDocument(TextDocumentEntity entity) async {
     try {
       await local.save(TextDocumentModel.fromEntity(entity));
-      await remote.upload(entity);
+      await remote.upload(entity, currentUser);
     } catch (e) {
       throw Exception('Ошибка при сохранении документа: $e');
     }
@@ -51,7 +57,7 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   Future<void> updateDocument(TextDocumentEntity entity) async {
     try {
       await local.update(TextDocumentModel.fromEntity(entity));
-      await remote.update(entity);
+      await remote.update(entity, currentUser);
     } catch (e) {
       throw Exception('Ошибка при обновлении документа: $e');
     }

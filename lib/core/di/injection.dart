@@ -34,6 +34,18 @@ class Injection {
 
     getIt.registerLazySingleton<DocumentsRepository>(
       () => DocumentsRepositoryImpl(
+        currentUser: getIt.get<AuthRepository>().getCurrentUser(),
+        local: getIt.get<LocalDocumentsSource>(),
+        remote: getIt.get<RemoteDocumentsSource>(),
+      ),
+    );
+  }
+
+  static updateDependency() {
+    getIt.unregister<DocumentsRepository>();
+    getIt.registerLazySingleton<DocumentsRepository>(
+      () => DocumentsRepositoryImpl(
+        currentUser: getIt.get<AuthRepository>().getCurrentUser(),
         local: getIt.get<LocalDocumentsSource>(),
         remote: getIt.get<RemoteDocumentsSource>(),
       ),

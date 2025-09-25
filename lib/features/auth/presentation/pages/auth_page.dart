@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:training_cloud_crm_web/core/di/injection.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/core/untils/snack_bar_helper.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_bloc.dart';
@@ -42,6 +43,7 @@ class _AuthPageState extends State<AuthPage> {
         listener: (context, state) {
           switch (state) {
             case AuthAuthenticated():
+              Injection.updateDependency();
               Navigator.pushReplacementNamed(context, AppNavigator.historyPage);
 
             case AuthLoading():
