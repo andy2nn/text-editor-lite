@@ -5,11 +5,25 @@ import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_state.dart';
+import 'package:training_cloud_crm_web/widgets/custom_app_bar.dart';
+import 'package:training_cloud_crm_web/widgets/custom_floating_action_button.dart';
+import 'package:training_cloud_crm_web/widgets/custom_icon_button.dart';
 import 'package:training_cloud_crm_web/widgets/document_card.dart';
 import 'package:training_cloud_crm_web/widgets/document_dialog_widget.dart';
 
-class HistoryPage extends StatelessWidget {
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
+
+  @override
+  State<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> {
+  @override
+  void initState() {
+    context.read<TextDocumentBloc>().add(LoadTextDocuments());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,35 +39,48 @@ class HistoryPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        context.read<TextDocumentBloc>().add(LoadTextDocuments());
+        final bloc = context.read<TextDocumentBloc>();
         return Scaffold(
-          appBar: AppBar(
+          appBar: CustomAppBar(
             title: const Text('Документы'),
             actions: [
-              IconButton(
+              CustomIconButton(
                 onPressed: () =>
                     context.read<TextDocumentBloc>().add(SyncTextDocuments()),
-                icon: const Icon(Icons.sync),
+                iconData: Icons.sync,
                 tooltip: 'Синхронизировать',
               ),
-              IconButton(
+              CustomIconButton(
                 onPressed: () =>
                     Navigator.pushNamed(context, AppNavigator.settingsPage),
-                icon: Icon(Icons.settings),
+                iconData: Icons.settings,
               ),
             ],
           ),
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-              child: _buildContent(state),
+              child: state is TextDocumentLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : bloc.documents.isEmpty
+                  ? const Center(child: Text('Нет документов'))
+                  : ListView.builder(
+                      itemCount: bloc.documents.length,
+                      itemBuilder: (context, index) {
+                        final document = bloc.documents[index];
+                        return DocumentCard(
+                          document: document,
+                          onTap: () => _navigateToDocument(context, document),
+                        );
+                      },
+                    ),
             ),
           ),
           floatingActionButton:
               (defaultTargetPlatform == TargetPlatform.macOS ||
                   defaultTargetPlatform == TargetPlatform.windows ||
                   defaultTargetPlatform == TargetPlatform.linux)
-              ? FloatingActionButton(
+              ? CustomFloatingActionButton(
                   onPressed: () => _showAddDocumentDialog(context),
                   child: const Icon(Icons.add),
                 )
@@ -61,29 +88,6 @@ class HistoryPage extends StatelessWidget {
         );
       },
     );
-  }
-
-  Widget _buildContent(TextDocumentState state) {
-    if (state is TextDocumentLoading) {
-      return const Center(child: CircularProgressIndicator());
-    } else if (state is TextDocumentLoaded) {
-      return state.documents.isEmpty
-          ? const Center(child: Text('Нет документов'))
-          : ListView.builder(
-              itemCount: state.documents.length,
-              itemBuilder: (context, index) {
-                final document = state.documents[index];
-                return DocumentCard(
-                  document: document,
-                  onTap: () => _navigateToDocument(context, document),
-                );
-              },
-            );
-    } else if (state is TextDocumentError) {
-      return Center(child: Text('Ошибка: ${state.errorMessage}'));
-    } else {
-      return const Center(child: Text('Загрузите документы'));
-    }
   }
 
   void _showAddDocumentDialog(BuildContext context) {

@@ -27,4 +27,8 @@ class DeleteTextDocument extends TextDocumentEvent {
   DeleteTextDocument({required this.id});
 }
 
+class StartTextDocumentEditing extends TextDocumentEvent {}
+
+class CancelTextDocumentEditing extends TextDocumentEvent {}
+
 class SyncTextDocuments extends TextDocumentEvent {}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
+import 'package:training_cloud_crm_web/core/untils/snack_bar_helper.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_event.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_state.dart';
@@ -39,38 +40,23 @@ class _AuthPageState extends State<AuthPage> {
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            Navigator.pushReplacementNamed(context, AppNavigator.historyPage);
-          }
-          if (state is AuthLoading) {
-            _isLoading = true;
-          } else {
-            _isLoading = false;
-          }
-          if (state is AuthSignUpSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'На вашу почту отправлено письмо для подтверждения',
-                ),
-              ),
-            );
-            _isSignIn = true;
-          }
-          if (state is AuthError) {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Ошибка'),
-                content: Text(state.errorMessage),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('OK'),
-                  ),
-                ],
-              ),
-            );
+          switch (state) {
+            case AuthAuthenticated():
+              Navigator.pushReplacementNamed(context, AppNavigator.historyPage);
+
+            case AuthLoading():
+              _isLoading = true;
+            case AuthSignUpSuccess():
+              SnackBarHelper.showSuccess(
+                context,
+                'На вашу почту отправлено письмо для подтверждения',
+              );
+              _isSignIn = true;
+              _isLoading = false;
+
+            case AuthError():
+              SnackBarHelper.showError(context, state.errorMessage);
+              _isLoading = false;
           }
         },
         builder: (context, state) => Center(

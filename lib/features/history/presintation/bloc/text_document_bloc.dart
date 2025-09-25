@@ -7,6 +7,10 @@ import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_d
 class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
   final DocumentsRepository docRepository;
 
+  List<TextDocumentEntity> _listDocuments = [];
+
+  List<TextDocumentEntity> get documents => _listDocuments;
+
   TextDocumentBloc({required this.docRepository})
     : super(TextDocumentInitial()) {
     on<LoadTextDocuments>(_loadTextDocuments);
@@ -15,6 +19,22 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     on<DeleteTextDocument>(_deleteTextDocument);
     on<SyncTextDocuments>(_syncTextDocuments);
     on<AddTextDocument>(_addTextDocument);
+    on<StartTextDocumentEditing>(_startTextDocumentEditing);
+    on<CancelTextDocumentEditing>(_cancelTextDocumentEditing);
+  }
+
+  Future<void> _startTextDocumentEditing(
+    StartTextDocumentEditing event,
+    Emitter<TextDocumentState> emit,
+  ) async {
+    emit(TextDocumentEditing());
+  }
+
+  Future<void> _cancelTextDocumentEditing(
+    CancelTextDocumentEditing event,
+    Emitter<TextDocumentState> emit,
+  ) async {
+    emit(TextDocumentEditingCancel());
   }
 
   Future<void> _addTextDocument(
@@ -30,7 +50,14 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
 
     await docRepository
         .saveDocument(document)
-        .catchError(((e) => emit(TextDocumentError(e.toString()))));
+        .then((_) {
+          _listDocuments.add(document);
+          emit(TextDocumentAdded(document: document));
+        })
+        .catchError(((e) {
+          emit(TextDocumentError(e.toString()));
+          return null;
+        }));
   }
 
   Future<void> _loadTextDocuments(
@@ -39,8 +66,8 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
   ) async {
     emit(TextDocumentLoading());
 
-    final documents = docRepository.getLocalDocuments();
-    emit(TextDocumentLoaded(documents: documents));
+    _listDocuments = docRepository.getLocalDocuments();
+    emit(TextDocumentLoaded());
   }
 
   Future<void> _saveTextDocument(
@@ -58,8 +85,19 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
   ) async {
     await docRepository
         .updateDocument(event.document)
-        .catchError(((e) => emit(TextDocumentError(e.toString()))));
-    ;
+        .then((_) {
+          emit(TextDocumentEditingSuccess());
+          final index = _listDocuments.indexWhere(
+            (doc) => doc.id == event.document.id,
+          );
+          if (index != -1) {
+            _listDocuments[index] = event.document;
+          }
+        })
+        .catchError(((e) {
+          emit(TextDocumentError(e.toString()));
+          return null;
+        }));
   }
 
   Future<void> _deleteTextDocument(
@@ -68,8 +106,14 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
   ) async {
     await docRepository
         .deleteDocument(event.id)
-        .catchError(((e) => emit(TextDocumentError(e.toString()))));
-    ;
+        .then((_) {
+          emit((TextDocumentDeleted()));
+          _listDocuments.removeWhere((doc) => doc.id == event.id);
+        })
+        .catchError(((e) {
+          emit(TextDocumentError(e.toString()));
+          return null;
+        }));
   }
 
   Future<void> _syncTextDocuments(
@@ -77,26 +121,48 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     emit(TextDocumentLoading());
-    final remoteDocuments = await docRepository.fetchRemoteDocuments();
-    final localDocuments = docRepository.getLocalDocuments();
 
-    for (var remoteDoc in remoteDocuments) {
-      final matchingLocalDocs = localDocuments
-          .where((doc) => doc.id == remoteDoc.id)
-          .toList();
+    await docRepository
+        .fetchRemoteDocuments()
+        .then((remoteDocuments) async {
+          final localDocuments = docRepository.getLocalDocuments();
+          final mergedDocuments = List<TextDocumentEntity>.from(localDocuments);
 
-      if (matchingLocalDocs.isEmpty) {
-        await docRepository
-            .saveDocument(remoteDoc)
-            .catchError(((e) => emit(TextDocumentError(e.toString()))));
-      } else {
-        final localDoc = matchingLocalDocs.first;
-        if (localDoc.lastEdited.isBefore(remoteDoc.lastEdited)) {
-          await docRepository
-              .updateDocument(remoteDoc)
-              .catchError(((e) => emit(TextDocumentError(e.toString()))));
-        }
-      }
-    }
+          for (TextDocumentEntity remoteDoc in remoteDocuments) {
+            final localDocIndex = mergedDocuments.indexWhere(
+              (doc) => doc.id == remoteDoc.id,
+            );
+
+            if (localDocIndex == -1) {
+              await docRepository.saveDocument(remoteDoc);
+              mergedDocuments.add(remoteDoc);
+            } else {
+              final localDoc = mergedDocuments[localDocIndex];
+              if (localDoc.lastEdited.isBefore(remoteDoc.lastEdited)) {
+                await docRepository.updateDocument(remoteDoc);
+                mergedDocuments[localDocIndex] = remoteDoc;
+              }
+            }
+          }
+
+          for (TextDocumentEntity localDoc in localDocuments) {
+            final remoteDocExists = remoteDocuments.any(
+              (doc) => doc.id == localDoc.id,
+            );
+            if (!remoteDocExists) {
+              await docRepository.saveDocument(localDoc);
+              if (!mergedDocuments.any((doc) => doc.id == localDoc.id)) {
+                mergedDocuments.add(localDoc);
+              }
+            }
+          }
+
+          _listDocuments = mergedDocuments;
+          emit(TextDocumentLoaded());
+        })
+        .catchError((e) {
+          emit(TextDocumentError(e.toString()));
+          return null;
+        });
   }
 }
