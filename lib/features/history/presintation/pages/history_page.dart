@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
@@ -61,7 +62,13 @@ class _HistoryPageState extends State<HistoryPage> {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               child: state is TextDocumentLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: Lottie.asset(
+                        'assets/loading.json',
+                        width: 150,
+                        height: 150,
+                      ),
+                    )
                   : bloc.documents.isEmpty
                   ? const Center(child: Text('Нет документов'))
                   : ListView.builder(

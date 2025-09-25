@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart';
 import 'package:training_cloud_crm_web/core/di/injection.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/core/untils/snack_bar_helper.dart';
@@ -68,6 +69,7 @@ class _AuthPageState extends State<AuthPage> {
               spacing: 20,
               mainAxisSize: MainAxisSize.min,
               children: [
+                Lottie.asset('assets/document.json', width: 250, height: 250),
                 CustomTextField(
                   controller: _emailController,
                   labelText: "Email",
