@@ -41,8 +41,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await authRepository
         .signOut()
         .then((_) async {
-          if (getIt.isRegistered<Box<TextDocumentModel>>()) {
-            final box = getIt<Box<TextDocumentModel>>();
+          if (Injection.getIt.isRegistered<Box<TextDocumentModel>>()) {
+            final box = Injection.getIt<Box<TextDocumentModel>>();
             await box.clear();
           }
           emit(AuthUnauthenticated());

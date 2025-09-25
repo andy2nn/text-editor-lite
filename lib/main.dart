@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:training_cloud_crm_web/app.dart';
-import 'package:training_cloud_crm_web/core/di/injection.dart' as di;
+import 'package:training_cloud_crm_web/core/di/injection.dart';
 import 'package:training_cloud_crm_web/core/untils/constans.dart';
 import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_bloc.dart';
@@ -18,19 +18,19 @@ void main() async {
 
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseAnonKey);
 
-  await di.setup();
+  await Injection.setup();
 
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(
           create: (context) =>
-              AuthBloc(authRepository: di.getIt.get<AuthRepository>())
+              AuthBloc(authRepository: Injection.getIt.get<AuthRepository>())
                 ..add(AuthStatusChecked()),
         ),
         BlocProvider(
           create: (context) => TextDocumentBloc(
-            docRepository: di.getIt.get<DocumentsRepository>(),
+            docRepository: Injection.getIt.get<DocumentsRepository>(),
           ),
         ),
       ],
