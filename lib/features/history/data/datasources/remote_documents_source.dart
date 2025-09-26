@@ -1,5 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:training_cloud_crm_web/features/auth/domain/user_entity.dart/user_entity.dart';
+import 'package:training_cloud_crm_web/features/auth/domain/entity/user_entity.dart';
 import 'package:training_cloud_crm_web/features/history/domain/entity/text_document_entity.dart';
 
 class RemoteDocumentsSource {

@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:training_cloud_crm_web/core/untils/constans.dart';
 import 'package:training_cloud_crm_web/features/auth/data/auth_repository_impl.dart';
 import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart';
+import 'package:training_cloud_crm_web/features/auth/domain/model/user_model.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/local_documents_source.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/remote_documents_source.dart';
 import 'package:training_cloud_crm_web/features/history/data/documents_repository_impl.dart';
@@ -16,13 +17,16 @@ class Injection {
 
   static Future<void> setup() async {
     Hive.registerAdapter(TextDocumentModelAdapter());
-    final box = await Hive.openBox<TextDocumentModel>(textsBox);
+    Hive.registerAdapter(UserModelAdapter());
+    final boxDocument = await Hive.openBox<TextDocumentModel>(textsBox);
+    final boxUser = await Hive.openBox<UserModel>(userBox);
 
-    getIt.registerLazySingleton<Box<TextDocumentModel>>(() => box);
+    getIt.registerLazySingleton<Box<UserModel>>(() => boxUser);
+    getIt.registerLazySingleton<Box<TextDocumentModel>>(() => boxDocument);
     getIt.registerLazySingleton<SupabaseClient>(() => supabase);
 
     getIt.registerLazySingleton<LocalDocumentsSource>(
-      () => LocalDocumentsSource(box),
+      () => LocalDocumentsSource(boxDocument),
     );
     getIt.registerLazySingleton<RemoteDocumentsSource>(
       () => RemoteDocumentsSource(supabase),
@@ -31,10 +35,8 @@ class Injection {
     getIt.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(supabase),
     );
-
     getIt.registerLazySingleton<DocumentsRepository>(
       () => DocumentsRepositoryImpl(
-        currentUser: getIt.get<AuthRepository>().getCurrentUser(),
         local: getIt.get<LocalDocumentsSource>(),
         remote: getIt.get<RemoteDocumentsSource>(),
       ),
@@ -42,10 +44,11 @@ class Injection {
   }
 
   static updateDependency() {
-    getIt.unregister<DocumentsRepository>();
+    if (getIt.isRegistered<DocumentsRepository>()) {
+      getIt.unregister<DocumentsRepository>();
+    }
     getIt.registerLazySingleton<DocumentsRepository>(
       () => DocumentsRepositoryImpl(
-        currentUser: getIt.get<AuthRepository>().getCurrentUser(),
         local: getIt.get<LocalDocumentsSource>(),
         remote: getIt.get<RemoteDocumentsSource>(),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
+import 'package:training_cloud_crm_web/core/untils/snack_bar_helper.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_state.dart';
@@ -30,13 +31,11 @@ class _HistoryPageState extends State<HistoryPage> {
   Widget build(BuildContext context) {
     return BlocConsumer<TextDocumentBloc, TextDocumentState>(
       listener: (context, state) {
-        if (state is TextDocumentError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
-        }
-        if (state is TextDocumentAdded) {
-          _navigateToDocument(context, state.document);
+        switch (state) {
+          case TextDocumentError():
+            SnackBarHelper.showError(context, state.errorMessage);
+          case TextDocumentAdded():
+            _navigateToDocument(context, state.document);
         }
       },
       builder: (context, state) {
