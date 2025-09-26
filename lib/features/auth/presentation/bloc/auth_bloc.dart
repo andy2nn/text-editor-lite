@@ -16,41 +16,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _signIn(SignInRequested event, Emitter<AuthState> emit) async {
-    try {
-      emit(AuthLoading());
-      await authRepository.signIn(event.email, event.password);
-      emit(AuthAuthenticated());
-    } catch (e) {
-      emit(AuthError(e.toString()));
-    }
+    emit(AuthLoading());
+
+    await authRepository
+        .signIn(event.email, event.password)
+        .then(((_) => emit(AuthAuthenticated())))
+        .catchError((error) {
+          emit(AuthError(error.toString()));
+        });
   }
 
   Future<void> _signUp(SignUpRequested event, Emitter<AuthState> emit) async {
-    try {
-      emit(AuthLoading());
-      await authRepository.signUp(event.email, event.password);
-      emit(AuthAuthenticated());
-    } catch (e) {
-      emit(AuthError(e.toString()));
-    }
+    emit(AuthLoading());
+    await authRepository
+        .signUp(event.email, event.password)
+        .then((_) => emit(AuthSignUpSuccess()))
+        .catchError((error) {
+          emit(AuthError(error.toString()));
+        });
   }
 
   Future<void> _signOut(SignOutRequested event, Emitter<AuthState> emit) async {
-    try {
-      emit(AuthLoading());
-
-      await authRepository.signOut();
-
-      if (getIt.isRegistered<Box<TextDocumentModel>>()) {
-        final box = getIt<Box<TextDocumentModel>>();
-        await box.clear();
-      }
-
-      emit(AuthUnauthenticated());
-    } catch (e) {
-      print('SignOut error: $e');
-      emit(AuthError(e.toString()));
-    }
+    emit(AuthLoading());
+    await authRepository
+        .signOut()
+        .then((_) async {
+          if (Injection.getIt.isRegistered<Box<TextDocumentModel>>()) {
+            final box = Injection.getIt<Box<TextDocumentModel>>();
+            await box.clear();
+          }
+          emit(AuthUnauthenticated());
+        })
+        .catchError((error) {
+          emit(AuthError(error.toString()));
+        });
   }
 
   Future<void> _authStatusCheck(

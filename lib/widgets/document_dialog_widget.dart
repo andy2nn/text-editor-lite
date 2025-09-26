@@ -10,7 +10,19 @@ class DocumentDialog extends StatefulWidget {
 }
 
 class _DocumentDialogState extends State<DocumentDialog> {
-  final _titleController = TextEditingController();
+  late final TextEditingController _titleController;
+
+  @override
+  void initState() {
+    _titleController = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +51,5 @@ class _DocumentDialogState extends State<DocumentDialog> {
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
   }
 }

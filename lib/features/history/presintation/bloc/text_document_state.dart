@@ -6,10 +6,7 @@ class TextDocumentInitial extends TextDocumentState {}
 
 class TextDocumentLoading extends TextDocumentState {}
 
-class TextDocumentLoaded extends TextDocumentState {
-  final List<TextDocumentEntity> documents;
-  TextDocumentLoaded({this.documents = const []});
-}
+class TextDocumentLoaded extends TextDocumentState {}
 
 class TextDocumentAdded extends TextDocumentState {
   final TextDocumentEntity document;
@@ -21,3 +18,11 @@ class TextDocumentError extends TextDocumentState {
 
   TextDocumentError(this.errorMessage);
 }
+
+class TextDocumentDeleted extends TextDocumentState {}
+
+class TextDocumentEditing extends TextDocumentState {}
+
+class TextDocumentEditingCancel extends TextDocumentState {}
+
+class TextDocumentEditingSuccess extends TextDocumentState {}

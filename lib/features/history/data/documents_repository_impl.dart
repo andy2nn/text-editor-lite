@@ -1,3 +1,8 @@
+import 'package:hive/hive.dart';
+import 'package:training_cloud_crm_web/core/di/injection.dart';
+import 'package:training_cloud_crm_web/core/untils/constans.dart';
+import 'package:training_cloud_crm_web/features/auth/domain/entity/user_entity.dart';
+import 'package:training_cloud_crm_web/features/auth/domain/model/user_model.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/local_documents_source.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/remote_documents_source.dart';
 import 'package:training_cloud_crm_web/features/history/domain/documents_repository.dart';
@@ -9,28 +14,56 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   final RemoteDocumentsSource remote;
   DocumentsRepositoryImpl({required this.local, required this.remote});
 
+  final UserEntity? _user = Injection.getIt
+      .get<Box<UserModel>>()
+      .get(currentUser)
+      ?.toEntity();
+
   @override
   Future<void> deleteDocument(int id) async {
-    await local.delete(id);
-    await remote.client.from('documents').delete().eq('id', id);
+    try {
+      await local.delete(id);
+      await remote.client.from('documents').delete().eq('id', id);
+    } catch (e) {
+      throw Exception('Ошибка при удалении документа: $e');
+    }
   }
 
   @override
-  Future<List<TextDocumentEntity>> fetchRemoteDocuments() => remote.fetchAll();
+  Future<List<TextDocumentEntity>> fetchRemoteDocuments() {
+    try {
+      return remote.fetchAll(_user);
+    } catch (e) {
+      throw Exception('Ошибка при получении документов с сервера: $e');
+    }
+  }
 
   @override
-  List<TextDocumentEntity> getLocalDocuments() =>
-      local.getAll().map((e) => e.toEntity()).toList();
+  List<TextDocumentEntity> getLocalDocuments() {
+    try {
+      return local.getAll().map((e) => e.toEntity()).toList();
+    } catch (e) {
+      throw Exception('Ошибка при получении локальных документов: $e');
+    }
+  }
 
   @override
   Future<void> saveDocument(TextDocumentEntity entity) async {
-    await local.save(TextDocumentModel.fromEntity(entity));
-    await remote.upload(entity);
+    try {
+      await local.save(TextDocumentModel.fromEntity(entity));
+      await remote.upload(entity, _user);
+    } catch (e) {
+      throw Exception('Ошибка при сохранении документа: $e');
+    }
   }
 
   @override
   Future<void> updateDocument(TextDocumentEntity entity) async {
-    await local.update(TextDocumentModel.fromEntity(entity));
-    await remote.update(entity);
+    try {
+      await local.update(TextDocumentModel.fromEntity(entity));
+      await remote.update(entity, _user);
+    } catch (e) {
+      throw Exception('Ошибка при обновлении документа: $e');
+    }
   }
 }
