@@ -5,11 +5,10 @@ import 'package:training_cloud_crm_web/features/history/presintation/pages/histo
 import 'package:training_cloud_crm_web/features/history/presintation/pages/text_document_page.dart';
 
 class AppNavigator {
-  //TODO:
-  static String historyPage = '/historyPage';
-  static String textDocumentPage = '/textDocumentPage';
-  static String settingsPage = '/historyPage/settingsPage';
-  static String authPage = 'authPage';
+  static const String historyPage = '/historyPage';
+  static const String textDocumentPage = '/textDocumentPage';
+  static const String settingsPage = '/historyPage/settingsPage';
+  static const String authPage = 'authPage';
 
   static Map<String, Widget Function(BuildContext)> routes = {
     authPage: (context) => const AuthPage(),

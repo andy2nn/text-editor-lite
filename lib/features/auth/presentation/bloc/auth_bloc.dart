@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:training_cloud_crm_web/core/di/injection.dart';
+import 'package:training_cloud_crm_web/features/auth/data/datasources/local_auth_source.dart';
 import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_event.dart';
 import 'package:training_cloud_crm_web/features/auth/presentation/bloc/auth_state.dart';
@@ -52,12 +53,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         });
   }
 
+  // Работает, но реализацию надо переделать чтобы было правильно
   Future<void> _authStatusCheck(
     AuthStatusChecked event,
     Emitter<AuthState> emit,
   ) async {
-    return authRepository.isSignedIn
-        ? emit(AuthAuthenticated())
-        : emit(AuthUnauthenticated());
+    final isSignedIn = authRepository.isSignedIn;
+    if (isSignedIn) {
+      final localAuth = LocalAuthSource();
+      if (await localAuth.authenticate()) {
+        emit(AuthAuthenticated());
+      }
+    }
   }
 }
