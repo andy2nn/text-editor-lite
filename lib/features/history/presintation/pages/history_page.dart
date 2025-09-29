@@ -2,9 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/core/untils/snack_bar_helper.dart';
+import 'package:training_cloud_crm_web/features/history/domain/entity/text_document_entity.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_state.dart';
@@ -117,7 +119,21 @@ class _HistoryPageState extends State<HistoryPage> {
           ),
           floatingActionButton: _checkMobilePlatform()
               ? CustomFloatingActionButton(
-                  onPressed: () {},
+                  onPressed: () => showDialog(
+                    builder: (context) => MobileScanner(
+                      onDetect: (result) {
+                        Navigator.pop(context);
+                        final document = TextDocumentEntity(
+                          id: DateTime.now().millisecondsSinceEpoch,
+                          title: "Сканированный документ",
+                          content: result.barcodes.first.rawValue ?? '',
+                          lastEdited: DateTime.now(),
+                        );
+                        _navigateToDocument(context, document);
+                      },
+                    ),
+                    context: context,
+                  ),
                   child: Icon(Icons.qr_code),
                 )
               : CustomFloatingActionButton(
