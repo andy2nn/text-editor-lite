@@ -15,3 +15,9 @@ class AuthError extends AuthState {
 
   AuthError(this.errorMessage);
 }
+
+class BiometricEnebled extends AuthState {}
+
+class BiometricFailed extends AuthState {}
+
+class BiometricDisabled extends AuthState {}

@@ -1,7 +1,16 @@
 import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalAuthSource {
+  late final SharedPreferences _prefs;
+  LocalAuthSource() {
+    _initPrefs();
+  }
   final LocalAuthentication _localAuth = LocalAuthentication();
+
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
 
   Future<bool> checkBiometrics() async {
     try {
@@ -17,6 +26,14 @@ class LocalAuthSource {
     } catch (e) {
       return [];
     }
+  }
+
+  Future<void> setBiometricEnabled(bool enabled) async {
+    await _prefs.setBool('biometric_enabled', enabled);
+  }
+
+  bool isBiometricEnabled() {
+    return _prefs.getBool('biometric_enabled') ?? false;
   }
 
   Future<bool> authenticate() async {

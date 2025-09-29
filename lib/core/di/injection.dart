@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:training_cloud_crm_web/core/untils/constans.dart';
 import 'package:training_cloud_crm_web/features/auth/data/auth_repository_impl.dart';
+import 'package:training_cloud_crm_web/features/auth/data/datasources/local_auth_source.dart';
 import 'package:training_cloud_crm_web/features/auth/domain/auth_repository.dart';
 import 'package:training_cloud_crm_web/features/auth/domain/model/user_model.dart';
 import 'package:training_cloud_crm_web/features/history/data/datasources/local_documents_source.dart';
@@ -24,6 +25,8 @@ class Injection {
     getIt.registerLazySingleton<Box<UserModel>>(() => boxUser);
     getIt.registerLazySingleton<Box<TextDocumentModel>>(() => boxDocument);
     getIt.registerLazySingleton<SupabaseClient>(() => supabase);
+
+    getIt.registerLazySingleton(() => LocalAuthSource());
 
     getIt.registerLazySingleton<LocalDocumentsSource>(
       () => LocalDocumentsSource(boxDocument),

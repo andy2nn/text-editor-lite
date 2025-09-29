@@ -15,3 +15,7 @@ class SignUpRequested extends AuthEvent {
 class SignOutRequested extends AuthEvent {}
 
 class AuthStatusChecked extends AuthEvent {}
+
+class EnableBiometric extends AuthEvent {}
+
+class DisableBiometric extends AuthEvent {}
