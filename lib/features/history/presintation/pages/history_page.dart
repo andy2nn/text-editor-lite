@@ -2,12 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:training_cloud_crm_web/core/untils/app_navigator.dart';
 import 'package:training_cloud_crm_web/core/untils/snack_bar_helper.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_bloc.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_event.dart';
 import 'package:training_cloud_crm_web/features/history/presintation/bloc/text_document_state.dart';
 import 'package:training_cloud_crm_web/widgets/custom_app_bar.dart';
+import 'package:training_cloud_crm_web/widgets/custom_button.dart';
 import 'package:training_cloud_crm_web/widgets/custom_floating_action_button.dart';
 import 'package:training_cloud_crm_web/widgets/custom_icon_button.dart';
 import 'package:training_cloud_crm_web/widgets/document_card.dart';
@@ -75,6 +77,37 @@ class _HistoryPageState extends State<HistoryPage> {
                       itemBuilder: (context, index) {
                         final document = bloc.documents[index];
                         return DocumentCard(
+                          onLongPress: () => _checkMobilePlatform()
+                              ? null
+                              : showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    contentPadding: EdgeInsets.all(20),
+                                    content: Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      width: 300,
+                                      child: Column(
+                                        spacing: 20,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          QrImageView(
+                                            data: document.content,
+                                            version: QrVersions.auto,
+                                            size: 200,
+                                            gapless: false,
+                                          ),
+                                          CustomButton(
+                                            text: 'Закрыть',
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
                           document: document,
                           onTap: () => _navigateToDocument(context, document),
                         );
@@ -82,15 +115,15 @@ class _HistoryPageState extends State<HistoryPage> {
                     ),
             ),
           ),
-          floatingActionButton:
-              (defaultTargetPlatform == TargetPlatform.macOS ||
-                  defaultTargetPlatform == TargetPlatform.windows ||
-                  defaultTargetPlatform == TargetPlatform.linux)
+          floatingActionButton: _checkMobilePlatform()
               ? CustomFloatingActionButton(
+                  onPressed: () {},
+                  child: Icon(Icons.qr_code),
+                )
+              : CustomFloatingActionButton(
                   onPressed: () => _showAddDocumentDialog(context),
                   child: const Icon(Icons.add),
-                )
-              : null,
+                ),
         );
       },
     );
@@ -121,5 +154,13 @@ class _HistoryPageState extends State<HistoryPage> {
       AppNavigator.textDocumentPage,
       arguments: {'document': document, 'canEdit': !isMobile},
     );
+  }
+
+  bool _checkMobilePlatform() {
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android) {
+      return true;
+    }
+    return false;
   }
 }

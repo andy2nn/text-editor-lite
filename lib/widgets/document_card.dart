@@ -15,6 +15,7 @@ class DocumentCard extends StatelessWidget {
     this.elevation = 4,
     this.padding = const EdgeInsets.all(20),
     this.showIcon = true,
+    this.onLongPress,
   });
 
   final TextDocumentEntity document;
@@ -25,6 +26,7 @@ class DocumentCard extends StatelessWidget {
   final double elevation;
   final EdgeInsets padding;
   final bool showIcon;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +54,7 @@ class DocumentCard extends StatelessWidget {
           ),
           shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.1),
           child: InkWell(
+            onLongPress: onLongPress,
             onTap: onTap,
             borderRadius: BorderRadius.circular(borderRadius),
             splashColor: primaryColor.withValues(alpha: 0.1),
