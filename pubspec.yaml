@@ -21,6 +21,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   local_auth: ^2.3.0
   shared_preferences: ^2.5.3
+  qr_flutter: ^4.1.0
+  mobile_scanner: ^7.1.2
 
 dev_dependencies:
   flutter_test:
