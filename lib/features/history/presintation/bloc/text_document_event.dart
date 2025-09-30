@@ -6,19 +6,16 @@ class LoadTextDocuments extends TextDocumentEvent {}
 
 class AddTextDocument extends TextDocumentEvent {
   final String title;
+  final String? encryptKey;
 
-  AddTextDocument({required this.title});
-}
-
-class SaveTextDocument extends TextDocumentEvent {
-  final TextDocumentEntity document;
-  SaveTextDocument({required this.document});
+  AddTextDocument({required this.title, this.encryptKey});
 }
 
 class UpdateTextDocument extends TextDocumentEvent {
+  final String? encryptKey;
   final TextDocumentEntity document;
 
-  UpdateTextDocument({required this.document});
+  UpdateTextDocument({required this.document, this.encryptKey});
 }
 
 class DeleteTextDocument extends TextDocumentEvent {
@@ -32,3 +29,9 @@ class StartTextDocumentEditing extends TextDocumentEvent {}
 class CancelTextDocumentEditing extends TextDocumentEvent {}
 
 class SyncTextDocuments extends TextDocumentEvent {}
+
+class DecryptTextDocument extends TextDocumentEvent {
+  final String encryptKey;
+  final TextDocumentEntity document;
+  DecryptTextDocument({required this.document, required this.encryptKey});
+}

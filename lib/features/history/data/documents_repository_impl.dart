@@ -48,22 +48,29 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   }
 
   @override
-  Future<void> saveDocument(TextDocumentEntity entity) async {
+  Future<TextDocumentEntity> saveDocument(
+    TextDocumentEntity entity,
+    String? encryptKey,
+  ) async {
     try {
-      await local.save(TextDocumentModel.fromEntity(entity));
-      await remote.upload(entity, _user);
+      if (encryptKey != null) {
+        return await local.save(
+          TextDocumentModel.fromEntity(entity),
+          encryptKey,
+        );
+      } else {
+        await remote.upload(entity, _user);
+        return await local.save(
+          TextDocumentModel.fromEntity(entity),
+          encryptKey,
+        );
+      }
     } catch (e) {
       throw Exception('Ошибка при сохранении документа: $e');
     }
   }
 
   @override
-  Future<void> updateDocument(TextDocumentEntity entity) async {
-    try {
-      await local.update(TextDocumentModel.fromEntity(entity));
-      await remote.update(entity, _user);
-    } catch (e) {
-      throw Exception('Ошибка при обновлении документа: $e');
-    }
-  }
+  String decryptTextDocument(TextDocumentEntity entity, String encryptKey) =>
+      local.decryptData(entity.content, encryptKey);
 }

@@ -5,12 +5,14 @@ class TextDocumentEntity {
   final String title;
   final String content;
   final DateTime lastEdited;
+  final bool? isEncrypted;
 
   TextDocumentEntity({
     required this.id,
     required this.title,
     required this.content,
     required this.lastEdited,
+    this.isEncrypted,
   });
 
   TextDocumentEntity copyWith({
@@ -18,12 +20,14 @@ class TextDocumentEntity {
     String? title,
     String? content,
     DateTime? lastEdited,
+    bool? isEncrypted,
   }) {
     return TextDocumentEntity(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
       lastEdited: lastEdited ?? this.lastEdited,
+      isEncrypted: isEncrypted ?? this.isEncrypted,
     );
   }
 

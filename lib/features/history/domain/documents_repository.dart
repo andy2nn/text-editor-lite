@@ -2,8 +2,11 @@ import 'package:training_cloud_crm_web/features/history/domain/entity/text_docum
 
 abstract class DocumentsRepository {
   List<TextDocumentEntity> getLocalDocuments();
-  Future<void> saveDocument(TextDocumentEntity entity);
+  Future<TextDocumentEntity> saveDocument(
+    TextDocumentEntity entity,
+    String? encryptKey,
+  );
   Future<void> deleteDocument(int id);
   Future<List<TextDocumentEntity>> fetchRemoteDocuments();
-  Future<void> updateDocument(TextDocumentEntity entity);
+  String decryptTextDocument(TextDocumentEntity entity, String encryptKey);
 }

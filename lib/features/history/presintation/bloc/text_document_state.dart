@@ -26,3 +26,9 @@ class TextDocumentEditing extends TextDocumentState {}
 class TextDocumentEditingCancel extends TextDocumentState {}
 
 class TextDocumentEditingSuccess extends TextDocumentState {}
+
+class TextDocumentDecryptred extends TextDocumentState {
+  final String encryptKey;
+  final TextDocumentEntity document;
+  TextDocumentDecryptred({required this.document, required this.encryptKey});
+}

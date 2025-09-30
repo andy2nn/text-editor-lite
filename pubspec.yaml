@@ -23,6 +23,8 @@ dependencies:
   shared_preferences: ^2.5.3
   qr_flutter: ^4.1.0
   mobile_scanner: ^7.1.2
+  crypto: ^3.0.6
+  encrypt: ^5.0.3
 
 dev_dependencies:
   flutter_test:
