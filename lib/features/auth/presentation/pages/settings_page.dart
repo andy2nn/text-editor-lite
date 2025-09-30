@@ -28,11 +28,33 @@ class SettingsPage extends StatelessWidget {
                     AppNavigator.authPage,
                     (context) => false,
                   );
+                case BiometricEnebled():
+                  SnackBarHelper.showSuccess(context, 'Биометрия добавлена');
+                case BiometricFailed():
+                  SnackBarHelper.showError(context, 'Ошмбка биометрии');
+                case BiometricDisabled():
+                  SnackBarHelper.showSuccess(context, "Биометрия выключена");
               }
             },
-            builder: (context, state) => CustomButton(
-              text: "Выйти",
-              onPressed: () => context.read<AuthBloc>().add(SignOutRequested()),
+            builder: (context, state) => Column(
+              spacing: 20,
+              children: [
+                CustomButton(
+                  text: "Выйти",
+                  onPressed: () =>
+                      context.read<AuthBloc>().add(SignOutRequested()),
+                ),
+                CustomButton(
+                  text: "Включить биометрию для входа",
+                  onPressed: () =>
+                      context.read<AuthBloc>().add(EnableBiometric()),
+                ),
+                CustomButton(
+                  text: "Выключить биометрию",
+                  onPressed: () =>
+                      context.read<AuthBloc>().add(DisableBiometric()),
+                ),
+              ],
             ),
           ),
         ),

@@ -19,6 +19,8 @@ dependencies:
   supabase_flutter: ^2.0.0
   lottie: ^3.3.2
   cupertino_icons: ^1.0.8
+  local_auth: ^2.3.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
