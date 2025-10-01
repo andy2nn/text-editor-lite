@@ -19,9 +19,11 @@ class Injection {
   static Future<void> setup() async {
     Hive.registerAdapter(TextDocumentModelAdapter());
     Hive.registerAdapter(UserModelAdapter());
+    final boxLocalAuth = await Hive.openBox<bool>(biometricEnabled);
     final boxDocument = await Hive.openBox<TextDocumentModel>(textsBox);
     final boxUser = await Hive.openBox<UserModel>(userBox);
 
+    getIt.registerLazySingleton(() => boxLocalAuth);
     getIt.registerLazySingleton<Box<UserModel>>(() => boxUser);
     getIt.registerLazySingleton<Box<TextDocumentModel>>(() => boxDocument);
     getIt.registerLazySingleton<SupabaseClient>(() => supabase);
