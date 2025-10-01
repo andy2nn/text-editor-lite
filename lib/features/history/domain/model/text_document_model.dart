@@ -14,14 +14,14 @@ class TextDocumentModel extends HiveObject {
   @HiveField(3)
   final DateTime lastEdited;
   @HiveField(4)
-  final bool? isEncrypted;
+  final bool isEncrypted;
 
   TextDocumentModel({
     required this.id,
     required this.title,
     required this.content,
     required this.lastEdited,
-    this.isEncrypted,
+    required this.isEncrypted,
   });
 
   TextDocumentModel copyWith({
@@ -56,7 +56,7 @@ class TextDocumentModel extends HiveObject {
       title: entity.title,
       content: entity.content,
       lastEdited: entity.lastEdited,
-      isEncrypted: entity.isEncrypted,
+      isEncrypted: entity.isEncrypted ?? false,
     );
   }
 }
