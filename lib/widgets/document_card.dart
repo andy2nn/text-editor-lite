@@ -95,16 +95,28 @@ class DocumentCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          document.title,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: txtColor,
-                            height: 1.2,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          spacing: 15,
+                          children: [
+                            Text(
+                              document.title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: txtColor,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            document.isEncrypted != null
+                                ? Icon(
+                                    Icons.lock_outline,
+                                    color: primaryColor,
+                                    size: 20,
+                                  )
+                                : SizedBox.shrink(),
+                          ],
                         ),
                         const SizedBox(height: 6),
                         Row(

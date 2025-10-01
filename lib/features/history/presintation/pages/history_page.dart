@@ -14,6 +14,7 @@ import 'package:training_cloud_crm_web/widgets/custom_app_bar.dart';
 import 'package:training_cloud_crm_web/widgets/custom_button.dart';
 import 'package:training_cloud_crm_web/widgets/custom_floating_action_button.dart';
 import 'package:training_cloud_crm_web/widgets/custom_icon_button.dart';
+import 'package:training_cloud_crm_web/widgets/custom_textfield.dart';
 import 'package:training_cloud_crm_web/widgets/document_card.dart';
 import 'package:training_cloud_crm_web/widgets/document_dialog_widget.dart';
 
@@ -40,6 +41,16 @@ class _HistoryPageState extends State<HistoryPage> {
             SnackBarHelper.showError(context, state.errorMessage);
           case TextDocumentAdded():
             _navigateToDocument(context, state.document);
+          case TextDocumentDecryptred():
+            Navigator.pushNamed(
+              context,
+              AppNavigator.textDocumentPage,
+              arguments: {
+                'document': state.document,
+                'canEdit': !_checkMobilePlatform(),
+                'encryptKey': state.encryptKey,
+              },
+            );
         }
       },
       builder: (context, state) {
@@ -149,27 +160,63 @@ class _HistoryPageState extends State<HistoryPage> {
     showDialog(
       context: context,
       builder: (context) => DocumentDialog(
-        onSave: (title) {
-          context.read<TextDocumentBloc>().add(AddTextDocument(title: title));
+        onSave: (title, password) {
+          context.read<TextDocumentBloc>().add(
+            AddTextDocument(title: title, encryptKey: password),
+          );
           Navigator.of(context).pop();
         },
       ),
     );
   }
 
-  void _navigateToDocument(BuildContext context, document) {
-    bool isMobile = true;
-    if (defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.windows ||
-        defaultTargetPlatform == TargetPlatform.linux) {
-      isMobile = false;
+  void _navigateToDocument(BuildContext context, TextDocumentEntity document) {
+    if (document.isEncrypted != null) {
+      final keyEncryptController = TextEditingController();
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Введите ключ шифрования'),
+          actions: [
+            CustomTextField(
+              labelText: 'Ключ шифрования',
+              controller: keyEncryptController,
+            ),
+            SizedBox(height: 15),
+            CustomButton(
+              text: 'Продолжить',
+              onPressed: () {
+                if (keyEncryptController.text.trim().isEmpty) {
+                  SnackBarHelper.showError(
+                    context,
+                    'Ключ не может быть пустым',
+                  );
+                } else {
+                  context.read<TextDocumentBloc>().add(
+                    DecryptTextDocument(
+                      document: document,
+                      encryptKey: keyEncryptController.text.trim(),
+                    ),
+                  );
+                  Navigator.pop(context);
+                }
+              },
+            ),
+            SizedBox(height: 15),
+            CustomButton(
+              text: 'Отмена',
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+    } else {
+      Navigator.pushNamed(
+        context,
+        AppNavigator.textDocumentPage,
+        arguments: {'document': document, 'canEdit': !_checkMobilePlatform()},
+      );
     }
-
-    Navigator.pushNamed(
-      context,
-      AppNavigator.textDocumentPage,
-      arguments: {'document': document, 'canEdit': !isMobile},
-    );
   }
 
   bool _checkMobilePlatform() {

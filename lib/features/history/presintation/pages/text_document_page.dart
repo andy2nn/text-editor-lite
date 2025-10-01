@@ -21,7 +21,7 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
   late TextEditingController _contentController;
   late final TextDocumentEntity document;
   bool _isEditing = false;
-
+  String? _encryptKey;
   bool _canEdit = false;
 
   @override
@@ -49,6 +49,7 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
     if (arguments != null && arguments is Map<String, dynamic>) {
       document = arguments['document'] as TextDocumentEntity;
       _canEdit = arguments['canEdit'] as bool;
+      _encryptKey = arguments['encryptKey'] as String?;
 
       _titleController.text = document.title;
       _contentController.text = document.content;
@@ -207,6 +208,7 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
           content: _contentController.text,
           lastEdited: DateTime.now(),
         ),
+        encryptKey: _encryptKey,
       ),
     );
   }

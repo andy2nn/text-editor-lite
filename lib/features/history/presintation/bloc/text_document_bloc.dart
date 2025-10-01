@@ -14,13 +14,33 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
   TextDocumentBloc({required this.docRepository})
     : super(TextDocumentInitial()) {
     on<LoadTextDocuments>(_loadTextDocuments);
-    on<SaveTextDocument>(_saveTextDocument);
     on<UpdateTextDocument>(_updateTextDocument);
     on<DeleteTextDocument>(_deleteTextDocument);
     on<SyncTextDocuments>(_syncTextDocuments);
     on<AddTextDocument>(_addTextDocument);
     on<StartTextDocumentEditing>(_startTextDocumentEditing);
     on<CancelTextDocumentEditing>(_cancelTextDocumentEditing);
+    on<DecryptTextDocument>(_decryptTextDocument);
+  }
+
+  Future<void> _decryptTextDocument(
+    DecryptTextDocument event,
+    Emitter<TextDocumentState> emit,
+  ) async {
+    await docRepository
+        .decryptTextDocument(event.document, event.encryptKey)
+        .then((decryptData) {
+          emit(
+            TextDocumentDecryptred(
+              document: event.document.copyWith(content: decryptData),
+              encryptKey: event.encryptKey,
+            ),
+          );
+        })
+        .catchError((errorMessage) {
+          emit(TextDocumentError(errorMessage.toString()));
+          return null;
+        });
   }
 
   Future<void> _startTextDocumentEditing(
@@ -46,18 +66,18 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
       title: event.title,
       content: '',
       lastEdited: DateTime.now(),
+      isEncrypted: event.encryptKey != null,
     );
-
     await docRepository
-        .saveDocument(document)
-        .then((_) {
-          _listDocuments.add(document);
-          emit(TextDocumentAdded(document: document));
+        .saveDocument(document, event.encryptKey)
+        .then((savedDocument) {
+          _listDocuments.add(savedDocument);
+          emit(TextDocumentAdded(document: savedDocument));
         })
-        .catchError(((e) {
+        .catchError((e) {
           emit(TextDocumentError(e.toString()));
           return null;
-        }));
+        });
   }
 
   Future<void> _loadTextDocuments(
@@ -65,18 +85,8 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     emit(TextDocumentLoading());
-
     _listDocuments = docRepository.getLocalDocuments();
     emit(TextDocumentLoaded());
-  }
-
-  Future<void> _saveTextDocument(
-    SaveTextDocument event,
-    Emitter<TextDocumentState> emit,
-  ) async {
-    await docRepository
-        .saveDocument(event.document)
-        .catchError((e) => emit(TextDocumentError(e.toString())));
   }
 
   Future<void> _updateTextDocument(
@@ -84,20 +94,20 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     await docRepository
-        .updateDocument(event.document)
-        .then((_) {
+        .saveDocument(event.document, event.encryptKey)
+        .then((savedDocument) {
           emit(TextDocumentEditingSuccess());
           final index = _listDocuments.indexWhere(
-            (doc) => doc.id == event.document.id,
+            (doc) => doc.id == savedDocument.id,
           );
           if (index != -1) {
-            _listDocuments[index] = event.document;
+            _listDocuments[index] = savedDocument;
           }
         })
-        .catchError(((e) {
+        .catchError((e) {
           emit(TextDocumentError(e.toString()));
           return null;
-        }));
+        });
   }
 
   Future<void> _deleteTextDocument(
@@ -107,13 +117,13 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     await docRepository
         .deleteDocument(event.id)
         .then((_) {
-          emit((TextDocumentDeleted()));
+          emit(TextDocumentDeleted());
           _listDocuments.removeWhere((doc) => doc.id == event.id);
         })
-        .catchError(((e) {
+        .catchError((e) {
           emit(TextDocumentError(e.toString()));
           return null;
-        }));
+        });
   }
 
   Future<void> _syncTextDocuments(
@@ -121,7 +131,6 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     Emitter<TextDocumentState> emit,
   ) async {
     emit(TextDocumentLoading());
-
     await docRepository
         .fetchRemoteDocuments()
         .then((remoteDocuments) async {
@@ -129,30 +138,40 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
           final mergedDocuments = List<TextDocumentEntity>.from(localDocuments);
 
           for (TextDocumentEntity remoteDoc in remoteDocuments) {
+            if (remoteDoc.isEncrypted == null) continue;
             final localDocIndex = mergedDocuments.indexWhere(
               (doc) => doc.id == remoteDoc.id,
             );
-
             if (localDocIndex == -1) {
-              await docRepository.saveDocument(remoteDoc);
-              mergedDocuments.add(remoteDoc);
+              final savedDocument = await docRepository.saveDocument(
+                remoteDoc,
+                null,
+              );
+              mergedDocuments.add(savedDocument);
             } else {
               final localDoc = mergedDocuments[localDocIndex];
               if (localDoc.lastEdited.isBefore(remoteDoc.lastEdited)) {
-                await docRepository.updateDocument(remoteDoc);
-                mergedDocuments[localDocIndex] = remoteDoc;
+                final savedDocument = await docRepository.saveDocument(
+                  remoteDoc,
+                  null,
+                );
+                mergedDocuments[localDocIndex] = savedDocument;
               }
             }
           }
 
           for (TextDocumentEntity localDoc in localDocuments) {
+            if (localDoc.isEncrypted == null) continue;
             final remoteDocExists = remoteDocuments.any(
               (doc) => doc.id == localDoc.id,
             );
             if (!remoteDocExists) {
-              await docRepository.saveDocument(localDoc);
-              if (!mergedDocuments.any((doc) => doc.id == localDoc.id)) {
-                mergedDocuments.add(localDoc);
+              final savedDocument = await docRepository.saveDocument(
+                localDoc,
+                null,
+              );
+              if (!mergedDocuments.any((doc) => doc.id == savedDocument.id)) {
+                mergedDocuments.add(savedDocument);
               }
             }
           }

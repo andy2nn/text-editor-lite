@@ -13,13 +13,32 @@ class TextDocumentModel extends HiveObject {
   final String content;
   @HiveField(3)
   final DateTime lastEdited;
+  @HiveField(4)
+  final bool? isEncrypted;
 
   TextDocumentModel({
     required this.id,
     required this.title,
     required this.content,
     required this.lastEdited,
+    this.isEncrypted,
   });
+
+  TextDocumentModel copyWith({
+    String? id,
+    String? title,
+    String? content,
+    DateTime? lastEdited,
+    bool? isEncrypted,
+  }) {
+    return TextDocumentModel(
+      isEncrypted: isEncrypted ?? this.isEncrypted,
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      lastEdited: lastEdited ?? this.lastEdited,
+    );
+  }
 
   TextDocumentEntity toEntity() {
     return TextDocumentEntity(
@@ -27,6 +46,7 @@ class TextDocumentModel extends HiveObject {
       title: title,
       content: content,
       lastEdited: lastEdited,
+      isEncrypted: isEncrypted,
     );
   }
 
@@ -36,6 +56,7 @@ class TextDocumentModel extends HiveObject {
       title: entity.title,
       content: entity.content,
       lastEdited: entity.lastEdited,
+      isEncrypted: entity.isEncrypted,
     );
   }
 }
