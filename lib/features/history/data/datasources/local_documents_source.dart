@@ -48,18 +48,14 @@ class LocalDocumentsSource {
   }
 
   String decryptData(String encryptedData, String encryptKey) {
-    try {
-      final dataBytes = base64.decode(encryptedData);
-      final keyBytes = sha256.convert(utf8.encode(encryptKey)).bytes;
+    final dataBytes = base64.decode(encryptedData);
+    final keyBytes = sha256.convert(utf8.encode(encryptKey)).bytes;
 
-      final result = Uint8List(dataBytes.length);
-      for (int i = 0; i < dataBytes.length; i++) {
-        result[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
-      }
-
-      return utf8.decode(result);
-    } catch (e) {
-      throw Exception('Ошибка расшифровки: ${e.toString()}');
+    final result = Uint8List(dataBytes.length);
+    for (int i = 0; i < dataBytes.length; i++) {
+      result[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
     }
+
+    return utf8.decode(result);
   }
 }

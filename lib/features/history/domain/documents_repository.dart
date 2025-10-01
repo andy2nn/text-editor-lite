@@ -8,5 +8,8 @@ abstract class DocumentsRepository {
   );
   Future<void> deleteDocument(int id);
   Future<List<TextDocumentEntity>> fetchRemoteDocuments();
-  String decryptTextDocument(TextDocumentEntity entity, String encryptKey);
+  Future<String> decryptTextDocument(
+    TextDocumentEntity entity,
+    String encryptKey,
+  );
 }

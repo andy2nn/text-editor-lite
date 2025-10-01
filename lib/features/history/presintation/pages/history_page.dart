@@ -182,6 +182,7 @@ class _HistoryPageState extends State<HistoryPage> {
               labelText: 'Ключ шифрования',
               controller: keyEncryptController,
             ),
+            SizedBox(height: 15),
             CustomButton(
               text: 'Продолжить',
               onPressed: () {
@@ -201,6 +202,7 @@ class _HistoryPageState extends State<HistoryPage> {
                 }
               },
             ),
+            SizedBox(height: 15),
             CustomButton(
               text: 'Отмена',
               onPressed: () => Navigator.pop(context),

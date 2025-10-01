@@ -71,6 +71,14 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
   }
 
   @override
-  String decryptTextDocument(TextDocumentEntity entity, String encryptKey) =>
-      local.decryptData(entity.content, encryptKey);
+  Future<String> decryptTextDocument(
+    TextDocumentEntity entity,
+    String encryptKey,
+  ) async {
+    try {
+      return local.decryptData(entity.content, encryptKey);
+    } catch (e) {
+      throw Exception('Ошибка расшифровки: ${e.toString()}');
+    }
+  }
 }

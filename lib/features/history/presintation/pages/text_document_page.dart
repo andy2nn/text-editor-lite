@@ -21,7 +21,7 @@ class _TextDocumentPageState extends State<TextDocumentPage> {
   late TextEditingController _contentController;
   late final TextDocumentEntity document;
   bool _isEditing = false;
-  String? _encryptKey = null;
+  String? _encryptKey;
   bool _canEdit = false;
 
   @override

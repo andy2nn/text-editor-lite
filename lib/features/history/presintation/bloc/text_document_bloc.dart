@@ -27,16 +27,20 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     DecryptTextDocument event,
     Emitter<TextDocumentState> emit,
   ) async {
-    final String decryptData = docRepository.decryptTextDocument(
-      event.document,
-      event.encryptKey,
-    );
-    emit(
-      TextDocumentDecryptred(
-        document: event.document.copyWith(content: decryptData),
-        encryptKey: event.encryptKey,
-      ),
-    );
+    await docRepository
+        .decryptTextDocument(event.document, event.encryptKey)
+        .then((decryptData) {
+          emit(
+            TextDocumentDecryptred(
+              document: event.document.copyWith(content: decryptData),
+              encryptKey: event.encryptKey,
+            ),
+          );
+        })
+        .catchError((errorMessage) {
+          emit(TextDocumentError(errorMessage.toString()));
+          return null;
+        });
   }
 
   Future<void> _startTextDocumentEditing(
