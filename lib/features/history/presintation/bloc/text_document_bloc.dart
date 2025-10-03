@@ -21,6 +21,20 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     on<StartTextDocumentEditing>(_startTextDocumentEditing);
     on<CancelTextDocumentEditing>(_cancelTextDocumentEditing);
     on<DecryptTextDocument>(_decryptTextDocument);
+    on<HandleScanDocument>(_handleScannedDocument);
+  }
+
+  Future<void> _handleScannedDocument(
+    HandleScanDocument event,
+    Emitter<TextDocumentState> emit,
+  ) async {
+    if (TextDocumentEntity.isDeepLink(event.scannedData)) {
+      final uri = Uri.parse(event.scannedData);
+      final document = TextDocumentEntity.fromDeepLink(uri);
+      emit(TextDocumentScanned(document: document));
+    } else {
+      emit(TextDocumentError("Ошибка сканирования"));
+    }
   }
 
   Future<void> _decryptTextDocument(
@@ -61,15 +75,8 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
     AddTextDocument event,
     Emitter<TextDocumentState> emit,
   ) async {
-    final document = TextDocumentEntity(
-      id: DateTime.now().millisecondsSinceEpoch,
-      title: event.title,
-      content: '',
-      lastEdited: DateTime.now(),
-      isEncrypted: event.encryptKey != null,
-    );
     await docRepository
-        .saveDocument(document, event.encryptKey)
+        .saveDocument(event.document, event.encryptKey)
         .then((savedDocument) {
           _listDocuments.add(savedDocument);
           emit(TextDocumentAdded(document: savedDocument));
@@ -138,7 +145,6 @@ class TextDocumentBloc extends Bloc<TextDocumentEvent, TextDocumentState> {
           final mergedDocuments = List<TextDocumentEntity>.from(localDocuments);
 
           for (TextDocumentEntity remoteDoc in remoteDocuments) {
-            if (remoteDoc.isEncrypted == null) continue;
             final localDocIndex = mergedDocuments.indexWhere(
               (doc) => doc.id == remoteDoc.id,
             );

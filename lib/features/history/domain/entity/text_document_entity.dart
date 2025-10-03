@@ -15,6 +15,40 @@ class TextDocumentEntity {
     this.isEncrypted,
   });
 
+  static bool isDeepLink(String data) {
+    try {
+      final uri = Uri.parse(data);
+      return uri.scheme == 'io.supabase.flutterquickstart' &&
+          (uri.host == 'document' || uri.host == 'open');
+    } catch (e) {
+      return false;
+    }
+  }
+
+  factory TextDocumentEntity.fromDeepLink(Uri uri) {
+    final params = uri.queryParameters;
+
+    return TextDocumentEntity(
+      id: int.parse(params['id']!),
+      title: Uri.decodeComponent(params['title']!),
+      content: utf8.decode(base64Url.decode(params['content']!)),
+      lastEdited: DateTime.parse(params['last_edited']!),
+      isEncrypted: params['is_encrypted'] == 'true',
+    );
+  }
+
+  String toDeepLink() {
+    final encodedTitle = Uri.encodeComponent(title);
+    final encodedContent = base64Url.encode(utf8.encode(content));
+
+    return 'io.supabase.flutterquickstart://document/details?'
+        'id=$id'
+        '&title=$encodedTitle'
+        '&content=$encodedContent'
+        '&last_edited=${lastEdited.toIso8601String()}'
+        '&is_encrypted=${isEncrypted ?? false}';
+  }
+
   TextDocumentEntity copyWith({
     int? id,
     String? title,

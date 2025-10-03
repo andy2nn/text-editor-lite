@@ -32,6 +32,107 @@ class _HistoryPageState extends State<HistoryPage> {
     super.initState();
   }
 
+  void _showQRCode(BuildContext context, TextDocumentEntity document) {
+    final qrData = document.toDeepLink();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.all(20),
+        content: Container(
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+          width: 300,
+          child: Column(
+            spacing: 10,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Данные документа',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              QrImageView(
+                data: qrData,
+                version: QrVersions.auto,
+                size: 200,
+                gapless: false,
+              ),
+              Text(
+                document.title,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              CustomButton(
+                text: 'Закрыть',
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToDocument(
+    BuildContext context,
+    TextDocumentEntity document,
+    bool isScanedDocument,
+  ) {
+    if (document.isEncrypted == true) {
+      final keyEncryptController = TextEditingController();
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Введите ключ шифрования'),
+          content: Column(
+            spacing: 15,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomTextField(
+                labelText: 'Ключ шифрования',
+                controller: keyEncryptController,
+              ),
+              CustomButton(
+                text: 'Продолжить',
+                onPressed: () {
+                  if (keyEncryptController.text.trim().isEmpty) {
+                    SnackBarHelper.showError(
+                      context,
+                      'Ключ не может быть пустым',
+                    );
+                  } else {
+                    isScanedDocument
+                        ? context.read<TextDocumentBloc>().add(
+                            AddTextDocument(
+                              document: document,
+                              encryptKey: keyEncryptController.text.trim(),
+                            ),
+                          )
+                        : context.read<TextDocumentBloc>().add(
+                            DecryptTextDocument(
+                              document: document,
+                              encryptKey: keyEncryptController.text.trim(),
+                            ),
+                          );
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              CustomButton(
+                text: 'Отмена',
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      Navigator.pushNamed(
+        context,
+        AppNavigator.textDocumentPage,
+        arguments: {'document': document, 'canEdit': !_checkMobilePlatform()},
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TextDocumentBloc, TextDocumentState>(
@@ -40,7 +141,7 @@ class _HistoryPageState extends State<HistoryPage> {
           case TextDocumentError():
             SnackBarHelper.showError(context, state.errorMessage);
           case TextDocumentAdded():
-            _navigateToDocument(context, state.document);
+            _navigateToDocument(context, state.document, false);
           case TextDocumentDecryptred():
             Navigator.pushNamed(
               context,
@@ -51,6 +152,8 @@ class _HistoryPageState extends State<HistoryPage> {
                 'encryptKey': state.encryptKey,
               },
             );
+          case TextDocumentScanned():
+            _navigateToDocument(context, state.document, true);
         }
       },
       builder: (context, state) {
@@ -92,37 +195,10 @@ class _HistoryPageState extends State<HistoryPage> {
                         return DocumentCard(
                           onLongPress: () => _checkMobilePlatform()
                               ? null
-                              : showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    contentPadding: EdgeInsets.all(20),
-                                    content: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      width: 300,
-                                      child: Column(
-                                        spacing: 20,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          QrImageView(
-                                            data: document.content,
-                                            version: QrVersions.auto,
-                                            size: 200,
-                                            gapless: false,
-                                          ),
-                                          CustomButton(
-                                            text: 'Закрыть',
-                                            onPressed: () =>
-                                                Navigator.pop(context),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              : _showQRCode(context, document),
                           document: document,
-                          onTap: () => _navigateToDocument(context, document),
+                          onTap: () =>
+                              _navigateToDocument(context, document, false),
                         );
                       },
                     ),
@@ -134,13 +210,14 @@ class _HistoryPageState extends State<HistoryPage> {
                     builder: (context) => MobileScanner(
                       onDetect: (result) {
                         Navigator.pop(context);
-                        final document = TextDocumentEntity(
-                          id: DateTime.now().millisecondsSinceEpoch,
-                          title: "Сканированный документ",
-                          content: result.barcodes.first.rawValue ?? '',
-                          lastEdited: DateTime.now(),
-                        );
-                        _navigateToDocument(context, document);
+                        if (result.barcodes.isNotEmpty) {
+                          final scannedData = result.barcodes.first.rawValue;
+                          if (scannedData != null) {
+                            context.read<TextDocumentBloc>().add(
+                              HandleScanDocument(scannedData: scannedData),
+                            );
+                          }
+                        }
                       },
                     ),
                     context: context,
@@ -161,62 +238,20 @@ class _HistoryPageState extends State<HistoryPage> {
       context: context,
       builder: (context) => DocumentDialog(
         onSave: (title, password) {
+          final document = TextDocumentEntity(
+            id: DateTime.now().millisecondsSinceEpoch,
+            title: title,
+            content: '',
+            lastEdited: DateTime.now(),
+            isEncrypted: password == null ? false : true,
+          );
           context.read<TextDocumentBloc>().add(
-            AddTextDocument(title: title, encryptKey: password),
+            AddTextDocument(document: document, encryptKey: password),
           );
           Navigator.of(context).pop();
         },
       ),
     );
-  }
-
-  void _navigateToDocument(BuildContext context, TextDocumentEntity document) {
-    if (document.isEncrypted != null) {
-      final keyEncryptController = TextEditingController();
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Введите ключ шифрования'),
-          actions: [
-            CustomTextField(
-              labelText: 'Ключ шифрования',
-              controller: keyEncryptController,
-            ),
-            SizedBox(height: 15),
-            CustomButton(
-              text: 'Продолжить',
-              onPressed: () {
-                if (keyEncryptController.text.trim().isEmpty) {
-                  SnackBarHelper.showError(
-                    context,
-                    'Ключ не может быть пустым',
-                  );
-                } else {
-                  context.read<TextDocumentBloc>().add(
-                    DecryptTextDocument(
-                      document: document,
-                      encryptKey: keyEncryptController.text.trim(),
-                    ),
-                  );
-                  Navigator.pop(context);
-                }
-              },
-            ),
-            SizedBox(height: 15),
-            CustomButton(
-              text: 'Отмена',
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
-    } else {
-      Navigator.pushNamed(
-        context,
-        AppNavigator.textDocumentPage,
-        arguments: {'document': document, 'canEdit': !_checkMobilePlatform()},
-      );
-    }
   }
 
   bool _checkMobilePlatform() {
