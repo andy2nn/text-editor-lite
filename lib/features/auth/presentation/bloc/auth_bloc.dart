@@ -93,6 +93,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (isSignedIn) {
       if (_localAuth.isBiometricEnabled() && await _localAuth.authenticate()) {
         emit(AuthAuthenticated());
+      } else if (!_localAuth.isBiometricEnabled()) {
+        emit(AuthAuthenticated());
       }
     }
   }
