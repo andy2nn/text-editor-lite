@@ -5,10 +5,10 @@ abstract class TextDocumentEvent {}
 class LoadTextDocuments extends TextDocumentEvent {}
 
 class AddTextDocument extends TextDocumentEvent {
-  final String title;
+  final TextDocumentEntity document;
   final String? encryptKey;
 
-  AddTextDocument({required this.title, this.encryptKey});
+  AddTextDocument({required this.document, this.encryptKey});
 }
 
 class UpdateTextDocument extends TextDocumentEvent {
@@ -34,4 +34,9 @@ class DecryptTextDocument extends TextDocumentEvent {
   final String encryptKey;
   final TextDocumentEntity document;
   DecryptTextDocument({required this.document, required this.encryptKey});
+}
+
+class HandleScanDocument extends TextDocumentEvent {
+  final String scannedData;
+  HandleScanDocument({required this.scannedData});
 }

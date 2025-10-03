@@ -109,7 +109,7 @@ class DocumentCard extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            document.isEncrypted != null
+                            document.isEncrypted == true
                                 ? Icon(
                                     Icons.lock_outline,
                                     color: primaryColor,

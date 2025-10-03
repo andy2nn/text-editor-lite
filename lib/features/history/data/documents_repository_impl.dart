@@ -53,11 +53,13 @@ class DocumentsRepositoryImpl implements DocumentsRepository {
     String? encryptKey,
   ) async {
     try {
-      if (encryptKey != null) {
+      if (encryptKey != null && entity.isEncrypted == false) {
         return await local.save(
           TextDocumentModel.fromEntity(entity),
           encryptKey,
         );
+      } else if (encryptKey != null && entity.isEncrypted == true) {
+        return await local.save(TextDocumentModel.fromEntity(entity), null);
       } else {
         await remote.upload(entity, _user);
         return await local.save(

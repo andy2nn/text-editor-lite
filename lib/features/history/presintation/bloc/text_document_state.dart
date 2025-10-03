@@ -32,3 +32,8 @@ class TextDocumentDecryptred extends TextDocumentState {
   final TextDocumentEntity document;
   TextDocumentDecryptred({required this.document, required this.encryptKey});
 }
+
+class TextDocumentScanned extends TextDocumentState {
+  final TextDocumentEntity document;
+  TextDocumentScanned({required this.document});
+}
