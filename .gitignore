@@ -51,3 +51,6 @@ windows
 
 # файлы генерации
 *.g.dart
+
+# константы с данными supabase
+lib/core/untils/safe_constants.dart

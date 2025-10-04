@@ -3,8 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:training_cloud_crm_web/app.dart';
 import 'package:training_cloud_crm_web/core/di/injection.dart';
-import 'package:training_cloud_crm_web/core/untils/constans.dart';
 import 'package:app_links/app_links.dart';
+import 'package:training_cloud_crm_web/core/untils/safe_constants.dart';
 import 'package:training_cloud_crm_web/features/history/domain/documents_repository.dart';
 import 'package:training_cloud_crm_web/features/history/domain/entity/text_document_entity.dart';
 
